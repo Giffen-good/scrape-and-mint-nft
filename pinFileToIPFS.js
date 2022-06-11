@@ -25,8 +25,8 @@ export const pinFileToIPFS = async (metadata) => {
     url: 'https://api.pinata.cloud/pinning/pinJSONToIPFS',
     headers: {
       'Content-Type': 'application/json',
-      'pinata_api_key': process.env.API_KEY,
-      'pinata_secret_api_key': process.env.API_SECRET
+      'pinata_api_key': process.env.PINATA_KEY,
+      'pinata_secret_api_key': process.env.PINATA_SECRET
     },
     data : data
   };

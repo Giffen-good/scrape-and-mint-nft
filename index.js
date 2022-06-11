@@ -6,7 +6,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 import sampleHashlist from './hashlist/devnet_sample_hash_list.json'  assert {type: "json"};
-import fomoHashlist from './hashlist/hash_list_BkWwABDdotSoFLh3s4oiHbGWAZDmFUoZRNDgZPodSkFJ.json'  assert {type: "json"};
 import { PublicKey } from "@solana/web3.js";
 import { Metadata } from "@metaplex-foundation/mpl-token-metadata"
 import fs from 'fs'
@@ -23,8 +22,7 @@ import {
 } from "@solana/web3.js";
 
 
-let sourceNftNetwork, collectionName, HASHLIST
-
+let sourceNftNetwork, collectionName;
 let sampleNetwork = false
 for (let i = 0; i < process.argv.length;i++) {
   if (process.argv[i] == '-s') sampleNetwork = true
@@ -32,25 +30,24 @@ for (let i = 0; i < process.argv.length;i++) {
 if (sampleNetwork) { // sample
   sourceNftNetwork = 'devnet'
   collectionName = 'sample-collection'
-  HASHLIST = sampleHashlist;
 } else {
   sourceNftNetwork = 'mainnet-beta'
   collectionName = 'fomo-bombs'
-  HASHLIST = fomoHashlist
 }
-
+const HASHLIST = sampleNetwork ? sampleHashlist : JSON.parse(await fsAsync.readFile(process.env.HASHLIST_PATH,{ encoding: 'utf8' }))
+const NFT_SYMBOL = "FB v2"
 const destDir = path.join(__dirname, 'nft-hashmap');
 if (!fs.existsSync(destDir)){
   fs.mkdirSync(destDir);
 }
 
-const ipfsHashmap = `./ipfs-hashmap/ipfs_${sourceNftNetwork}_${collectionName}_${process.env.WALLET}.json`
+const ipfsHashmap = `./ipfs-hashmap/ipfs_${sourceNftNetwork}_${collectionName}_${process.env.WALLET_PUBLIC}.json`
 const ipfsHashDir = path.join(__dirname, 'ipfs-hashmap');
 if (!fs.existsSync(ipfsHashDir)) fs.mkdirSync(ipfsHashDir);
 if (!fs.existsSync(ipfsHashmap)) fs.writeFileSync(ipfsHashmap, JSON.stringify({}, null, 4))
 
 const connection = new Connection(process.env.SOL_RPC_URL, "confirmed");
-const secret = new Uint8Array(process.env.SECRET.split(','));
+const secret = new Uint8Array(process.env.WALLET_PRIVATE.split(','));
 const keypair = Keypair.fromSecretKey(secret)
 
 
@@ -84,7 +81,7 @@ const uploadMetadataToIpfs = async (metadata) => {
     "creators":
       [
         {
-          "address": process.env.WALLET,
+          "address": process.env.WALLET_PUBLIC,
           "share": 100
         }
       ]
@@ -129,7 +126,7 @@ const main = async () => {
       p = pin
     } else {
         p = json[sourceMintAddress]
-        console.log(`File Already Uploaded ${p}`)
+        console.log(`File Already Uploaded ${p} skipping..`)
     }
     const url = `${process.env.IPFS_GATEWAY_URL}/${p}`;
 
@@ -145,7 +142,7 @@ const main = async () => {
     console.log("Minted:" , m.mint.toString())
     if (m.mint) hashmap[sourceMintAddress] = m.mint.toString()
   }
-  let filename = `./nft-hashmap/nft-hashmap_${sourceNftNetwork}_${collectionName}_${process.env.WALLET}`
+  let filename = `./nft-hashmap/nft-hashmap_${sourceNftNetwork}_${collectionName}_${process.env.WALLET_PUBLIC}`
   let j = 0;
   while (fs.existsSync(`${filename}_v${j}.json`)) {
     j++;
