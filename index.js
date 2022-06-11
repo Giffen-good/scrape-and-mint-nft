@@ -23,10 +23,15 @@ import {
 
 
 let sourceNftNetwork, collectionName;
-let sampleNetwork = false
+let sampleNetwork = false;
+let skipUpload = false;
+let skipMint = false;
 for (let i = 0; i < process.argv.length;i++) {
   if (process.argv[i] == '-s') sampleNetwork = true
+  if (process.argv[i] == '--skip-upload') skipUpload = true
+  if (process.argv[i] == '--skip-mint') skipMint = true
 }
+
 if (sampleNetwork) { // sample
   sourceNftNetwork = 'devnet'
   collectionName = 'sample-collection'
@@ -41,10 +46,15 @@ if (!fs.existsSync(destDir)){
   fs.mkdirSync(destDir);
 }
 
-const ipfsHashmap = `./ipfs-hashmap/ipfs_${sourceNftNetwork}_${collectionName}_${process.env.WALLET_PUBLIC}.json`
+const ipfsHashmapPath = `./ipfs-hashmap/ipfs_${sourceNftNetwork}_${collectionName}_${process.env.WALLET_PUBLIC}.json`
 const ipfsHashDir = path.join(__dirname, 'ipfs-hashmap');
 if (!fs.existsSync(ipfsHashDir)) fs.mkdirSync(ipfsHashDir);
-if (!fs.existsSync(ipfsHashmap)) fs.writeFileSync(ipfsHashmap, JSON.stringify({}, null, 4))
+if (!fs.existsSync(ipfsHashmapPath)) fs.writeFileSync(ipfsHashmapPath, JSON.stringify({}, null, 4))
+
+const nftHashDir = path.join(__dirname, 'nft-hashmap');
+let nftHashmapPath = `./nft-hashmap/nft-hashmap_${sourceNftNetwork}_${collectionName}_${process.env.WALLET_PUBLIC}`
+if (!fs.existsSync(nftHashDir)) fs.mkdirSync(nftHashDir);
+if (!fs.existsSync(nftHashmapPath)) fs.writeFileSync(nftHashmapPath, JSON.stringify({}, null, 4))
 
 const connection = new Connection(process.env.SOL_RPC_URL, "confirmed");
 const secret = new Uint8Array(process.env.WALLET_PRIVATE.split(','));
@@ -98,13 +108,10 @@ const uploadMetadataToIpfs = async (metadata) => {
 
 
 
-
-
-const main = async () => {
+const initUpload = async () => {
   const c =  new Connection(clusterApiUrl(sourceNftNetwork), "confirmed");
+  const b = []
   const hashmap = {}
-
-  let bombs = []
   for (let i = 0; i < HASHLIST.length;i++) {
     const tokenMint = HASHLIST[i];
     const key = new PublicKey(
@@ -115,41 +122,71 @@ const main = async () => {
     const tokenMetadata = await Metadata.load(c, metadataPDA);
     let metadata = await axios.get(tokenMetadata.data.data.uri);
     const sourceMintAddress = tokenMetadata.data.mint;
-    const map = await fsAsync.readFile(ipfsHashmap,{ encoding: 'utf8' })
+    const map = await fsAsync.readFile(ipfsHashmapPath,{ encoding: 'utf8' })
     const json = JSON.parse(map);
     let p;
+    metadata.data.symbol = NFT_SYMBOL;
     if (!json[sourceMintAddress]) {
       const {pin} = await uploadMetadataToIpfs( metadata.data, sourceMintAddress )
       json[sourceMintAddress] = pin
-      fs.writeFileSync(ipfsHashmap, JSON.stringify(json, null, 4))
-      console.log(`File Uploaded ${pin}`)
+      fs.writeFileSync(ipfsHashmapPath, JSON.stringify(json, null, 4))
+      console.log(`File Uploaded ${pin} (${i})`)
       p = pin
     } else {
-        p = json[sourceMintAddress]
-        console.log(`File Already Uploaded ${p} skipping..`)
+      p = json[sourceMintAddress]
+      console.log(`File Already Uploaded ${p} skipping.. (${i})`)
     }
     const url = `${process.env.IPFS_GATEWAY_URL}/${p}`;
 
-    bombs.push({
+    b.push({
       sourceMintAddress,
       uploadedMetadataURL: url
     })
   }
-  console.log('\n')
-  for (let j = 0; j < bombs.length;j++) {
-    const { sourceMintAddress, uploadedMetadataURL } = bombs[j]
-    const m = await mint(uploadedMetadataURL);
-    console.log("Minted:" , m.mint.toString())
-    if (m.mint) hashmap[sourceMintAddress] = m.mint.toString()
-  }
-  let filename = `./nft-hashmap/nft-hashmap_${sourceNftNetwork}_${collectionName}_${process.env.WALLET_PUBLIC}`
-  let j = 0;
-  while (fs.existsSync(`${filename}_v${j}.json`)) {
-    j++;
-  }
-  filename = `${filename}_v${j}.json`
+  return 0
+}
 
-  fs.writeFileSync(filename, JSON.stringify(hashmap, null, 4))
+
+const initMint = async () => {
+  console.log('initMint')
+  const nftMap = await fsAsync.readFile(nftHashmapPath,{ encoding: 'utf8' })
+  const NftHashmap = JSON.parse(nftMap);
+  const ipfsmap = await fsAsync.readFile(ipfsHashmapPath,{ encoding: 'utf8' })
+  const ipfsHashmap = JSON.parse(ipfsmap);
+  for (let j = 0; j < Object.keys(ipfsHashmap).length;j++) {
+    const sourceMintAddress = Object.keys(ipfsHashmap)[j]
+    const targetMintAddress = NftHashmap[sourceMintAddress];
+    if (targetMintAddress) {
+      console.log("is Already minted:")
+      console.log(`\n`)
+
+      console.log(`src address: ${Object.keys(ipfsHashmap)[j]}, target address: ${targetMintAddress}, ipfs address ${ipfsHashmap[Object.keys(ipfsHashmap)[j]]}`)
+      continue;
+    }
+
+    const uploadedMetadataURL = `https://project89.mypinata.cloud/ipfs/${ipfsHashmap[sourceMintAddress]}`;
+    const m = await mint(uploadedMetadataURL);
+    console.log(`Minted: , ${m.mint.toString()}, uploadedMetadataURL: ${uploadedMetadataURL}`)
+    NftHashmap[sourceMintAddress] = m.mint.toString()
+    fs.writeFileSync(nftHashmapPath, JSON.stringify(NftHashmap, null, 4))
+    console.log(`\n`)
+  }
+}
+const main = async () => {
+  if (skipUpload && skipMint) {
+    console.error("You can't skip the upload AND the mint. What exactly do you want this program to do for you?")
+    return
+  } else if (skipUpload) {
+    await initMint();
+  } else if (skipMint) {
+    await initUpload();
+  } else {
+    await initUpload();
+    await initMint();
+  }
+
+  console.log('\n')
+
   return 0
 }
 
