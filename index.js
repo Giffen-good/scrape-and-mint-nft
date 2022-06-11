@@ -12,7 +12,7 @@ import { Metadata } from "@metaplex-foundation/mpl-token-metadata"
 import fs from 'fs'
 import fsAsync from 'fs/promises'
 import path from 'path'
-import * as ipfsClient from "ipfs-http-client";
+
 import {pinFileToIPFS} from './pinFileToIPFS.js'
 import { actions, utils, programs, NodeWallet } from "@metaplex/js";
 import {
@@ -43,7 +43,7 @@ const mint = async (metadata) => {
     connection,
     wallet: new NodeWallet(keypair),
     uri: metadata,
-    maxSupply: 1,
+    maxSupply: 0,
   });
   return mintNFTResponse
 }
