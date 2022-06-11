@@ -106,7 +106,7 @@ const main = async () => {
       console.log(`File Uploaded ${pin}`)
       p = pin
     } else {
-        p = ${json[sourceMintAddress]}
+        p = json[sourceMintAddress]
         console.log(`File Already Uploaded ${p}`)
     }
     const url = `${process.env.IPFS_GATEWAY_URL}/${p}`;
