@@ -4,12 +4,26 @@
   "main": "index.js",
   "license": "MIT",
   "type": "module",
+  "scripts": {
+    "start": "node --experimental-json-modules ./dist/index.js",
+    "mint": "node --experimental-json-modules ./dist/index.js --skip-upload",
+    "upload": "node --experimental-json-modules ./dist/index --skip-mint",
+    "serve": "yarn run build-dist && yarn run start",
+    "build-dist": "./node_modules/typescript/bin/tsc",
+    "mocha": "mocha --recursive --reporter spec -r ./dist/test/bootstrap.js",
+    "test": "yarn build-dist && node --experimental-json-modules ./dist/index.js -s"
+  },
   "dependencies": {
     "@metaplex-foundation/mpl-token-metadata": "1.2",
     "@metaplex/js": "^4.12.0",
+    "@types/": "metaplex/js",
     "JSONStream": "^1.3.5",
     "dotenv": "^16.0.1",
     "ipfs-http-client": "^57.0.1",
-    "node-fetch": "^3.2.6"
+    "node-fetch": "^3.2.6",
+    "typescript": "^4.7.3"
+  },
+  "devDependencies": {
+    "@tsconfig/node16-strictest-esm": "^1.0.2"
   }
 }

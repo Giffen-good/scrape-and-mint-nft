@@ -16,14 +16,22 @@ Creates a hashtable between:
 
 ### set .env variables:
 ```.env
-SOL_RPC_URL= https://api.devnet.solana.com 
-API_SECRET= // Pinata Secret
-API_KEY= // Pinata key
-IPFS_GATEWAY_URL=https://ipfs.infura.io/ipfs
+PINATA_SECRET= // Pinata Secret
+PINATA_KEY= // Pinata key
+PUBLIC_IPFS_GATEWAY_URL=https://ipfs.infura.io
+PRIVATE_IPFS_GATEWAY_URL=https://[custom].mypinata.cloud
 
-WALLET_PUBLIC= // Public Address
-SECRET= // Private Key ..eg. [23,15,55, ..., 24]
+USER_WALLET_PUBLIC= // Public Address
+USER_WALLET_PRIVATE= // Private Key ..eg. 23,15,55,...,24
+
 HASHLIST_PATH=./hashlist/devnet_sample_hash_list.json
+HASHLIST_NETWORK=devnet
+UPLOAD_NETWORK=devnet
+
+
+
+UPDATE_AUTHORITY_PUBLIC=437T5rcFnTguJcU8iWpothVkbre5Cw2hqYDeEn8tyuL3
+UPDATE_AUTHORITY_PRIVATE= // Private Key ..eg. 23,15,55,...,24
 ```
 
 
