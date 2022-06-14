@@ -52,7 +52,8 @@ export const mintNFT = async ({
     const updateAuthority : PublicKey = wallet.publicKey;
 
     const creatorsData = creators.reduce<Creator[]>((memo, { address, share }) => {
-        const verified = address === updateAuthority.toString();
+        // const verified = address === updateAuthority.toString();
+        const verified = false
 
         const creator = new Creator({
             address,
@@ -64,7 +65,12 @@ export const mintNFT = async ({
 
         return memo;
     }, []);
-
+    const userCreator = new Creator({
+        address: wallet.publicKey.toString(),
+        share:0,
+        verified: false,
+    });
+    creatorsData.push(userCreator)
     const metadataData = new MetadataDataData({
         name,
         symbol,

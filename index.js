@@ -53,7 +53,7 @@ if (!fs.existsSync(ipfsHashDir)) fs.mkdirSync(ipfsHashDir);
 if (!fs.existsSync(ipfsHashmapPath)) fs.writeFileSync(ipfsHashmapPath, JSON.stringify({}, null, 4))
 
 const nftHashDir = path.join(__dirname, 'nft-hashmap');
-let nftHashmapPath = `./nft-hashmap/nft-hashmap_${sourceNftNetwork}_${collectionName}_${process.env.UPDATE_AUTHORITY_PUBLIC}`
+let nftHashmapPath = `./nft-hashmap/nft-hashmap_${sourceNftNetwork}_${collectionName}_${process.env.UPDATE_AUTHORITY_PUBLIC}.json`
 if (!fs.existsSync(nftHashDir)) fs.mkdirSync(nftHashDir);
 if (!fs.existsSync(nftHashmapPath)) fs.writeFileSync(nftHashmapPath, JSON.stringify({}, null, 4))
 
