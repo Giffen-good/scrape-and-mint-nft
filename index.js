@@ -16,6 +16,7 @@ import {pinFileToIPFS} from './util/pinFileToIPFS.js'
 import {mintNFT} from "./util/mintNFT.js";
 import { getPrivateRpcUrl } from "./util/getPrivateRpcUrl.js";
 import { actions, utils, programs, NodeWallet } from "@metaplex/js";
+import {MintIX} from "./util/MintIx.js";
 import {
   Connection,
   Keypair,
@@ -65,8 +66,34 @@ const keypair = Keypair.fromSecretKey(secret)
 
 
 
-
-
+//
+// const decomposedMint = async (pin) => {
+//   const ix = await MintIX({
+//     connection,
+//     wallet: keypair,
+//     pin,
+//     maxSupply: 0,
+//   })
+//   let signedTransactions = [];
+//
+//   try {
+//     signedTransactions = await signAllTransactions(transactions);
+//   } catch (err) {
+//     console.log(`Failed to sign transaction: ${err.toString()}`);
+//     return;
+//   }
+//
+//   const inProgressTransactions = [];
+//
+//   for (const transaction of signedTransactions) {
+//     inProgressTransactions.push(
+//       sendAndConfirmTransaction(
+//         transaction,
+//         connection,
+//       ),
+//     );
+//   }
+// }
 const mint = async (pin) => {
 
   const mintNFTResponse = await mintNFT({
