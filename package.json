@@ -8,7 +8,8 @@
     "start": "node --experimental-json-modules ./dist/index.js",
     "mint": "node --experimental-json-modules ./dist/index.js --skip-upload",
     "upload": "node --experimental-json-modules ./dist/index --skip-mint",
-    "serve": "yarn run build-dist && yarn run start",
+    "create-fake-hashmap":  "node --experimental-json-modules ./util/createFakeHashlist.js",
+    "serve": "yarn build-dist && yarn start",
     "build-dist": "./node_modules/typescript/bin/tsc",
     "mocha": "mocha --recursive --reporter spec -r ./dist/test/bootstrap.js",
     "test": "yarn build-dist && node --experimental-json-modules ./dist/index.js -s"

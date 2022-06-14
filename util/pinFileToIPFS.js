@@ -10,9 +10,9 @@ export const pinFileToIPFS = async (metadata) => {
   //metadata is optional
   const d = {}
   d.pinataMetadata = {
-    name: 'FOMO BOMBS Devnet',
+    name: 'FOMO BOMBS OFFICIAL TEST',
     keyvalues: {
-      version: 'devnet v0.1'
+      version: 'devnet v1.0'
     }
   }
   d.pinataOptions = {

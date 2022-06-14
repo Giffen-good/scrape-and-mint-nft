@@ -42,7 +42,7 @@ if (sampleNetwork) { // sample
 }
 const realHashlist = await fsAsync.readFile(process.env.HASHLIST_PATH,{ encoding: 'utf8' });
 const HASHLIST = sampleNetwork ? sampleHashlist : JSON.parse(realHashlist)
-const NFT_SYMBOL = "FB v2"
+const NFT_SYMBOL = "FB"
 const destDir = path.join(__dirname, 'nft-hashmap');
 if (!fs.existsSync(destDir)){
   fs.mkdirSync(destDir);
@@ -66,34 +66,6 @@ const keypair = Keypair.fromSecretKey(secret)
 
 
 
-//
-// const decomposedMint = async (pin) => {
-//   const ix = await MintIX({
-//     connection,
-//     wallet: keypair,
-//     pin,
-//     maxSupply: 0,
-//   })
-//   let signedTransactions = [];
-//
-//   try {
-//     signedTransactions = await signAllTransactions(transactions);
-//   } catch (err) {
-//     console.log(`Failed to sign transaction: ${err.toString()}`);
-//     return;
-//   }
-//
-//   const inProgressTransactions = [];
-//
-//   for (const transaction of signedTransactions) {
-//     inProgressTransactions.push(
-//       sendAndConfirmTransaction(
-//         transaction,
-//         connection,
-//       ),
-//     );
-//   }
-// }
 const mint = async (pin) => {
 
   const mintNFTResponse = await mintNFT({
@@ -107,6 +79,8 @@ const mint = async (pin) => {
 
 
 const uploadMetadataToIpfs = async (metadata) => {
+  const fin = metadata.name.split(" ")[metadata.name.split(" ").length - 1]
+  metadata.name = `FOMO Bombs V2 ${fin}`
   metadata.properties = {
     "files":
       [
@@ -120,10 +94,6 @@ const uploadMetadataToIpfs = async (metadata) => {
         {
           "address": process.env.UPDATE_AUTHORITY_PUBLIC,
           "share": 100
-        },
-        {
-          "address": process.env.USER_WALLET_PUBLIC,
-          "share": 0
         }
       ]
   }

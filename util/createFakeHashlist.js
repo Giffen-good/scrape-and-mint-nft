@@ -1,6 +1,6 @@
 import 'dotenv/config'
-import IPFS_HASHLIST from '../ipfs-hashmap/ipfs_mainnet_fomo-bombs_8ih2rmb3zRKr7sjeo1BF3tUcybj8sw1zSpQjfZtNqRuZ.json' assert {type: "json"};
-import HASHLIST from '../nft-hashmap/nft-hashmap_mainnet_fomo-bombs_8ih2rmb3zRKr7sjeo1BF3tUcybj8sw1zSpQjfZtNqRuZ.json' assert {type: "json"};
+import IPFS_HASHLIST from '../ipfs-hashmap/ipfs_mainnet_fomo-bombs_4Uh6Agkewj4JJUKSensrKHXuvgpLrnTDBMWrhWkGioUy.json' assert {type: "json"};
+import HASHLIST from '../nft-hashmap/nft-hashmap_mainnet_fomo-bombs_4Uh6Agkewj4JJUKSensrKHXuvgpLrnTDBMWrhWkGioUy.json' assert {type: "json"};
 import fs from "fs";
 export const createFakeHashlist = () => {
     const fakeMintList = {};
@@ -12,7 +12,7 @@ export const createFakeHashlist = () => {
     return fakeMintList;
 }
 const writeHashlistToFile = () => {
-    let nftHashmapPath = `../nft-hashmap/fake-nft-hashmap_mainnet_fomo-bombs_8ih2rmb3zRKr7sjeo1BF3tUcybj8sw1zSpQjfZtNqRuZ.json`
+    let nftHashmapPath = process.env.FAKE_NFT_HASHMAP;
     const fakeMintList = createFakeHashlist()
 
     fs.writeFileSync(nftHashmapPath, JSON.stringify(fakeMintList, null, 4))
