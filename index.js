@@ -16,7 +16,7 @@ import {pinFileToIPFS} from './util/pinFileToIPFS.js'
 import {mintNFT} from "./util/mintNFT.js";
 import { getPrivateRpcUrl } from "./util/getPrivateRpcUrl.js";
 import { actions, utils, programs, NodeWallet } from "@metaplex/js";
-import {MintIX} from "./util/MintIx.js";
+import { getPDA } from "./util/getPDA.js";
 import {
   Connection,
   Keypair,
@@ -27,10 +27,12 @@ let sourceNftNetwork, collectionName;
 let sampleNetwork = false;
 let skipUpload = false;
 let skipMint = false;
+let testPDAMethods = false;
 for (let i = 0; i < process.argv.length;i++) {
   if (process.argv[i] == '-s') sampleNetwork = true
   if (process.argv[i] == '--skip-upload') skipUpload = true
   if (process.argv[i] == '--skip-mint') skipMint = true
+  if (process.argv[i] == '--test-pda') testPDAMethods = true
 }
 
 if (sampleNetwork) { // sample
@@ -165,23 +167,43 @@ const initMint = async () => {
     console.log(`\n`)
   }
 }
-const main = async () => {
-  if (skipUpload && skipMint) {
+
+
+const TestPDA = async () => {
+  const sampleToken = new PublicKey('3VnFZTmJaVavL8NW8UdP9MyNS5qDSMuTstiegkmMHoFD');
+  const METADATA_PROGRAM_PK = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s');
+  const EDITION = 'edition';
+  const PREFIX = 'metadata';
+  console.log(sampleToken)
+  const metadataPDA = await Metadata.getPDA(sampleToken);
+  console.log({metadataPDA})
+  const myPDA = await getPDA({
+    PREFIX,
+    programPK: METADATA_PROGRAM_PK,
+    tokenPK: sampleToken,
+    EDITION
+  });
+  console.log(myPDA)
+
+}
+
+// Main
+(async () => {
+  if (testPDAMethods) {
+    await TestPDA()
+  }
+  else if (skipUpload && skipMint) {
     console.error("You can't skip the upload AND the mint. What exactly do you want this program to do for you?")
-    testTS({tx: "this is a tx"})
-    return
   } else if (skipUpload) {
     await initMint();
   } else if (skipMint) {
     await initUpload();
   } else {
-    await initUpload();
-    await initMint();
+      await initUpload();
+      await initMint();
   }
 
   console.log('\n')
 
   return 0
-}
-
-main()
+})();
